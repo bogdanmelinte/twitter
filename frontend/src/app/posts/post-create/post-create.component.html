@@ -1,0 +1,17 @@
+<div class="well">
+    <h4>Add/Modify Post</h4>
+    <br/>
+    <form (ngSubmit)="submitPost()">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-user"></span></span>
+                <input type="text" class="form-control" placeholder="Tag" [(ngModel)]="model.tag" name="tag">
+            </div>
+            <br />
+            <textarea class="form-control" rows="3" placeholder="Text" [(ngModel)]="model.text" name="text"></textarea>
+            <br />
+            <button *ngIf="!editing" type="submit" class="btn btn-primary btn-block">Add</button>
+            <button *ngIf="editing" type="submit" class="btn btn-warning btn-block">Update</button>
+        </div>
+    </form>
+</div>

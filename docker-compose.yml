@@ -1,0 +1,42 @@
+version: '2'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  backend-nginx:
+    build: ./backend
+    container_name: backend-nginx
+    environment:
+      - VIRTUAL_HOST=twitter-backend.dev
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - backend-php
+    links:
+      - backend-php
+  backend-php:
+    build: ./backend-php
+    container_name: backend-php
+    volumes:
+      - ./backend:/var/www/html
+    links:
+      - backend-db
+  backend-db:
+    image: mysql
+    container_name: backend-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=twitter
+      - MYSQL_ROOT_PASSWORD=root
+  frontend-nginx:
+    build: ./frontend
+    container_name: frontend-nginx
+    environment:
+      - VIRTUAL_HOST=twitter-frontend.dev
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
