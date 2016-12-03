@@ -35,6 +35,25 @@ Thumbs.db
 /bower_components
 npm-debug.log
 
+# Coverage #
+/coverage/
+
+# Typing #
+/frontend/src/typings/tsd/
+/typings/
+/tsd_typings/
+
+# Dist #
+/dist
+/public/__build__/
+/frontend/src/*/__build__/
+/__build__/**
+/public/dist/
+/frontend/src/*/dist/
+/dist/**
+/.awcache
+.webpack.json
+
 # Doc #
 /doc/
 

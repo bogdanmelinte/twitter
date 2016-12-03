@@ -8,23 +8,21 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
   backend-nginx:
-    build: ./backend
+    image: nginx
     container_name: backend-nginx
     environment:
       - VIRTUAL_HOST=twitter-backend.dev
     volumes:
       - ./backend:/var/www/html
     depends_on:
+      - backend-builder
       - backend-php
-    links:
-      - backend-php
+      - backend-db
   backend-php:
-    build: ./backend-php
+    build: ./backend
     container_name: backend-php
     volumes:
       - ./backend:/var/www/html
-    links:
-      - backend-db
   backend-db:
     image: mysql
     container_name: backend-db
@@ -34,7 +32,7 @@ services:
       - MYSQL_DATABASE=twitter
       - MYSQL_ROOT_PASSWORD=root
   frontend-nginx:
-    build: ./frontend
+    image: nginx
     container_name: frontend-nginx
     environment:
       - VIRTUAL_HOST=twitter-frontend.dev
