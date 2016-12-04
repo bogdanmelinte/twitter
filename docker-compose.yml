@@ -1,28 +1,28 @@
 version: '2'
 services:
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    container_name: nginx-proxy
-    ports:
-      - "80:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
   backend-nginx:
     image: nginx
     container_name: backend-nginx
+    ports:
+      - "10000:80"
     environment:
       - VIRTUAL_HOST=twitter-backend.dev
     volumes:
-      - ./backend:/var/www/html
+      - ./backend:/app
+      - ./backend/docker_config/nginx:/etc/nginx/conf.d
+    command: bash -c "chmod +x /app/wait-for-it.sh && ./app/wait-for-it.sh backend-php:9000 -t 60 && nginx -g 'daemon off;'"
     depends_on:
-      - backend-builder
       - backend-php
-      - backend-db
   backend-php:
     build: ./backend
     container_name: backend-php
     volumes:
-      - ./backend:/var/www/html
+      - ./backend:/app
+    working_dir: /app
+    depends_on:
+      - backend-db
+      - backend-builder
+    command: bash -c "chmod +x /app/wait-for-it.sh && ./wait-for-it.sh backend-db:3306 -t 60 && phalcon migration run --config=app/configs/server.development.php && php-fpm"
   backend-db:
     image: mysql
     container_name: backend-db
@@ -31,10 +31,30 @@ services:
     environment:
       - MYSQL_DATABASE=twitter
       - MYSQL_ROOT_PASSWORD=root
+  backend-builder:
+    image: composer/composer
+    container_name: backend-builder
+    volumes:
+      - ./backend:/app
+    command: install --ignore-platform-reqs
   frontend-nginx:
     image: nginx
     container_name: frontend-nginx
+    ports:
+      - "10001:80"
     environment:
       - VIRTUAL_HOST=twitter-frontend.dev
     volumes:
-      - ./frontend/dist:/usr/share/nginx/html
+      - ./frontend:/app
+      - ./frontend/docker_config/nginx:/etc/nginx/conf.d
+    command: bash -c "chmod +x /app/wait-for-it.sh && ./app/wait-for-it.sh backend-nginx:80 -t 60 && nginx -g 'daemon off;'"
+    depends_on:
+      - backend-nginx
+      - frontend-builder
+  frontend-builder:
+    image: node
+    container_name: frontend-builder
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: bash -c "npm install && npm run build:prod"

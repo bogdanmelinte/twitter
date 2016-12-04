@@ -6,7 +6,7 @@ import { Post } from './post.model';
 @Injectable()
 export class PostService {
 
-    private url = 'http://twitter-backend.dev/posts';
+    private url = 'http://' + document.location.hostname + ':10000/posts';
 
     constructor (private http: Http) {}
 
@@ -27,6 +27,9 @@ export class PostService {
 
     // Add a new post
     addPost (body: Object): Observable<Post[]> {
+        delete body['createdAt'];
+        delete body['updatedAt'];
+
         let bodyString = JSON.stringify(body);
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
@@ -38,6 +41,9 @@ export class PostService {
 
     // Update a post
     updatePost (body: Object): Observable<Post[]> {
+        delete body['createdAt'];
+        delete body['updatedAt'];
+
         let bodyString = JSON.stringify(body);
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
